@@ -2,466 +2,353 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Magic 8 Ball</title>
-    <style>
-        body {
-            background: #5d228a;
-            color: white;
-            font-family: 'Segoe UI', sans-serif;
-            text-align: center;
-            padding-top: 60px;
-            margin: 0;
-            height: 100vh;
-            overflow: hidden;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Magic 8 Ball</title>
+  <style>
+    body {
+      background: #5d228a;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      padding-top: 40px;
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+    }
 
-        h1 {
-            text-shadow: #00bcd4;
-            padding-bottom: 25px;
-            text-align: center;
-        }
+    h1 {
+      padding-bottom: 20px;
+      text-align: center;
+    }
 
-        .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-        .magic-8-ball {
-            background: radial-gradient(circle at 30% 30%, #333 0%, #000 80%);
-            border-radius: 50%;
-            width: 300px;
-            height: 300px;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 50px rgba(0, 255, 255, 0.3), inset 0 0 40px rgba(255, 255, 255, 0.05);
-            margin-bottom: 25px;
-            transition: transform 0.5s ease;
-        }
+    .magic-8-ball {
+      background: radial-gradient(circle at 30% 30%, #333 0%, #000 80%);
+      border-radius: 50%;
+      width: 300px;
+      height: 300px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 50px rgba(0, 255, 255, 0.3),
+        inset 0 0 40px rgba(255, 255, 255, 0.05);
+      margin-bottom: 25px;
+      transition: transform 0.5s ease;
+    }
 
-        .magic-8-ball::before {
-            content: '';
-            position: absolute;
-            width: 100px;
-            height: 100px;
-            top: 20px;
-            left: 20px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 80%);
-            border-radius: 50%;
-            filter: blur(3px);
-            pointer-events: none;
-        }
+    .magic-8-ball.shake {
+      animation: shake 0.6s;
+    }
 
-        .magic-8-ball.shake {
-            animation: shake 0.6s;
-        }
+    @keyframes shake {
+      0%, 100% { transform: rotate(0deg); }
+      20% { transform: rotate(5deg); }
+      40% { transform: rotate(-5deg); }
+      60% { transform: rotate(5deg); }
+      80% { transform: rotate(-5deg); }
+    }
 
-        @keyframes shake {
+    .answer {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.6);
+      box-shadow: 0 0 12px rgba(0, 255, 255, 0.3);
+      position: relative;
+      z-index: 2;
+      backdrop-filter: blur(4px);
+    }
 
-            0%,
-            100% {
-                transform: rotate(0deg);
-            }
+    .triangle {
+      position: absolute;
+      top: 60%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(180deg);
+      width: 0;
+      height: 0;
+      border-left: 60px solid transparent;
+      border-right: 60px solid transparent;
+      border-bottom: 95px solid white;
+      z-index: 1;
+    }
 
-            20% {
-                transform: rotate(5deg);
-            }
+    .answer-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 70px;
+      font-family: monospace;
+      text-transform: uppercase;
+      font-size: 11px;
+      font-weight: bold;
+      text-align: center;
+      color: black;
+      z-index: 2;
+      line-height: 1.2;
+      padding: 2px;
+      transition: opacity 0.3s ease;
+    }
 
-            40% {
-                transform: rotate(-5deg);
-            }
+    button {
+      background: linear-gradient(145deg, #00d9ff, #00bcd4);
+      border: none;
+      border-radius: 10px;
+      padding: 12px 24px;
+      font-size: 16px;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 255, 255, 0.3);
+      transition: all 0.3s ease;
+    }
 
-            60% {
-                transform: rotate(5deg);
-            }
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 12px rgba(0, 255, 255, 0.5);
+    }
 
-            80% {
-                transform: rotate(-5deg);
-            }
-        }
+    /* Custom answers panel */
+    .custom-form {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      align-items: center;
+      width: 90%;
+      max-width: 420px;
+    }
 
-        .number {
-            position: absolute;
-            top: 10px;
-            font-size: 48px;
-            color: rgba(255, 255, 255, 0.7);
-            z-index: 1;
-            font-weight: bold;
-            text-shadow: 0 0 8px #000;
-        }
+    #customInput {
+      flex: 1;
+      background: #0f0f12;
+      border: 1px solid #1e2a2f;
+      color: #e9f6f6;
+      padding: 10px 12px;
+      border-radius: 10px;
+      outline: none;
+    }
 
-        .answer {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            background: rgba(0, 0, 0, 0.6);
-            box-shadow: 0 0 12px rgba(0, 255, 255, 0.3);
-            position: relative;
-            z-index: 2;
-            backdrop-filter: blur(4px);
-        }
+    #customInput::placeholder {
+      color: #8fa8ad;
+    }
 
+    .add-btn {
+      background: linear-gradient(145deg, #00d9ff, #00bcd4);
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 255, 255, 0.25);
+    }
 
-        /* Triangle inside the answer window */
-        .triangle {
-            position: absolute;
-            top: 60%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(180deg);
-            width: 0;
-            height: 0;
-            border-left: 60px solid transparent;
-            border-right: 60px solid transparent;
-            border-bottom: 95px solid white;
-            z-index: 1;
-        }
+    .custom-answers {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px auto 6px;
+      width: 90%;
+      max-width: 520px;
+      justify-content: center;
+    }
 
-        .answer-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 70px;
-            font-family: monospace;
-            text-transform: uppercase;
-            font-size: 11px;
-            font-weight: bold;
-            text-align: center;
-            color: black;
-            z-index: 2;
-            line-height: 1.2;
-            padding: 2px;
-        }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #e8ffff;
+      border-radius: 999px;
+      font-size: 12px;
+    }
 
-        button {
-            background: linear-gradient(145deg, #00d9ff, #00bcd4);
-            border: none;
-            border-radius: 10px;
-            padding: 12px 24px;
-            font-size: 16px;
-            color: white;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 255, 255, 0.3);
-            transition: all 0.3s ease;
-        }
+    .chip .remove {
+      background: transparent;
+      border: none;
+      color: #9ad7dd;
+      cursor: pointer;
+      font-weight: bold;
+      line-height: 1;
+      padding: 0 2px;
+    }
 
-        button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 12px rgba(0, 255, 255, 0.5);
-        }
+    .custom-actions {
+      margin-top: 6px;
+    }
 
-        /* Accessibility helper for label */
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 1px, 1px);
-            white-space: nowrap;
-            border: 0;
-        }
+    .clear-btn {
+      background: transparent;
+      color: #8fa8ad;
+      border: 1px dashed #39555b;
+      border-radius: 10px;
+      padding: 6px 10px;
+      cursor: pointer;
+    }
 
-        /* Custom answers panel */
-        .custom-form {
-            display: flex;
-            gap: 10px;
-            margin-top: 14px;
-            align-items: center;
-            width: 90%;
-            max-width: 420px;
-        }
-
-        #customInput {
-            flex: 1;
-            background: #0f0f12;
-            border: 1px solid #1e2a2f;
-            color: #e9f6f6;
-            padding: 10px 12px;
-            border-radius: 10px;
-            outline: none;
-        }
-
-        #customInput::placeholder {
-            color: #8fa8ad;
-        }
-
-        .add-btn {
-            background: linear-gradient(145deg, #00d9ff, #00bcd4);
-            border: none;
-            border-radius: 10px;
-            padding: 10px 14px;
-            color: white;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0, 255, 255, 0.25);
-            transition: transform .15s ease;
-        }
-
-        .add-btn:hover {
-            transform: translateY(-1px);
-        }
-
-        .custom-answers {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin: 10px auto 6px;
-            width: 90%;
-            max-width: 520px;
-            justify-content: center;
-        }
-
-        .chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 10px;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #e8ffff;
-            border-radius: 999px;
-            font-size: 12px;
-        }
-
-        .chip .remove {
-            background: transparent;
-            border: none;
-            color: #9ad7dd;
-            cursor: pointer;
-            font-weight: bold;
-            line-height: 1;
-            padding: 0 2px;
-        }
-
-        .custom-actions {
-            margin-top: 2px;
-        }
-
-        .clear-btn {
-            background: transparent;
-            color: #8fa8ad;
-            border: 1px dashed #39555b;
-            border-radius: 10px;
-            padding: 6px 10px;
-            cursor: pointer;
-        }
-
-        .clear-btn:hover {
-            color: #b7d7dc;
-            border-style: solid;
-        }
-
-        /* Mobile hint (existing from earlier step) */
-        .mobile-hint {
-            font-size: 14px;
-            color: #aaa;
-            margin-top: 10px;
-        }
-    </style>
+    .mobile-hint {
+      font-size: 14px;
+      color: #aaa;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 
 <body>
-    <div class="container">
-        <h1>🎱 Magic 8 Ball 🎱</h1>
-        <div class="magic-8-ball" id="magicBall">
-            <div class="answer" id="answer">
-                <div class="triangle"></div>
-                <span class="answer-text" id="answerText">ASK ME ANYTHING</span>
-            </div>
-        </div>
-
-        <button id="shakeBtn" onclick="shakeBall()">Shake</button>
-
-        <!-- NEW: custom answers panel -->
-        <form id="customForm" class="custom-form" autocomplete="off">
-            <label for="customInput" class="sr-only">Add your own answer</label>
-            <input id="customInput" type="text" placeholder="Add your own answer…" maxlength="50"
-                aria-label="Add your own answer" />
-            <button type="submit" class="add-btn">Add</button>
-        </form>
-
-        <div class="custom-answers" id="customAnswers">
-            <!-- chips rendered here -->
-        </div>
-
-        <div class="custom-actions">
-            <button id="clearCustom" class="clear-btn" type="button">Clear custom answers</button>
-        </div>
-
-        <p class="mobile-hint">On mobile? Shake your phone!</p>
+  <div class="container">
+    <h1>🎱 Magic 8 Ball 🎱</h1>
+    <div class="magic-8-ball" id="magicBall">
+      <div class="answer">
+        <div class="triangle"></div>
+        <span class="answer-text" id="answerText">ASK ME ANYTHING</span>
+      </div>
     </div>
 
-    <script>
-        /* ===== Built-in answers ===== */
-        const defaultAnswers = [
-            "Yes", "No", "Maybe", "Ask again later",
-            "Definitely", "Absolutely not", "It is certain",
-            "I doubt it", "Most likely", "Cannot predict now",
-            "You may rely on it", "Outlook good", "My sources say no"
-        ];
+    <button id="shakeBtn" type="button">Shake</button>
+    <button id="enableMotion" type="button" class="clear-btn" style="margin-top:8px;">
+      Enable phone shake
+    </button>
 
-        /* ===== Custom answers state & persistence ===== */
-        const STORAGE_KEY = "magic8_custom_answers";
-        let customAnswers = loadCustomAnswers();
+    <!-- Custom answers panel -->
+    <form id="customForm" class="custom-form" autocomplete="off">
+      <input id="customInput" type="text" placeholder="Add your own answer…" maxlength="50" />
+      <button type="submit" class="add-btn">Add</button>
+    </form>
 
-        function loadCustomAnswers() {
-            try {
-                const raw = localStorage.getItem(STORAGE_KEY);
-                return raw ? JSON.parse(raw) : [];
-            } catch {
-                return [];
-            }
-        }
-        function saveCustomAnswers() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnswers));
-        }
+    <div class="custom-answers" id="customAnswers"></div>
+    <div class="custom-actions">
+      <button id="clearCustom" class="clear-btn" type="button">Clear custom answers</button>
+    </div>
 
-        /* ===== UI elements ===== */
-        const answerText = document.getElementById("answerText");
-        const ball = document.getElementById("magicBall");
-        const customForm = document.getElementById("customForm");
-        const customInput = document.getElementById("customInput");
-        const customList = document.getElementById("customAnswers");
-        const clearBtn = document.getElementById("clearCustom");
+    <p class="mobile-hint">On mobile? Shake your phone!</p>
+  </div>
 
-        /* ===== Shake animation + pick answer ===== */
-        function shakeBall() {
-            // prevent overlapping shakes on rapid motion
-            if (ball.classList.contains("shake")) return;
+  <script>
+    const defaultAnswers = [
+      "Yes", "No", "Maybe", "Ask again later",
+      "Definitely", "Absolutely not", "It is certain",
+      "I doubt it", "Most likely", "Cannot predict now",
+      "You may rely on it", "Outlook good", "My sources say no"
+    ];
 
-            ball.classList.add("shake");
-            answerText.style.opacity = 0;
+    const STORAGE_KEY = "magic8_custom_answers";
+    let customAnswers = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
 
-            setTimeout(() => {
-                const pool = [...defaultAnswers, ...customAnswers];
-                const randomAnswer = pool[Math.floor(Math.random() * pool.length)] || "ASK AGAIN LATER";
+    const answerText = document.getElementById("answerText");
+    const ball = document.getElementById("magicBall");
+    const customForm = document.getElementById("customForm");
+    const customInput = document.getElementById("customInput");
+    const customList = document.getElementById("customAnswers");
+    const clearBtn = document.getElementById("clearCustom");
 
-                answerText.textContent = randomAnswer.toUpperCase();
-                answerText.style.opacity = 1;
-                ball.classList.remove("shake");
-            }, 600);
-        }
-        window.shakeBall = shakeBall; // keep global for the button
+    function shakeBall() {
+      if (ball.classList.contains("shake")) return;
+      ball.classList.add("shake");
+      answerText.style.opacity = 0;
+      setTimeout(() => {
+        const pool = [...defaultAnswers, ...customAnswers];
+        const randomAnswer = pool[Math.floor(Math.random() * pool.length)] || "ASK AGAIN LATER";
+        answerText.textContent = randomAnswer.toUpperCase();
+        answerText.style.opacity = 1;
+        ball.classList.remove("shake");
+      }, 600);
+    }
 
-        /* ===== Render custom chips ===== */
-        function renderCustomChips() {
-            customList.innerHTML = "";
-            customAnswers.forEach((ans, idx) => {
-                const chip = document.createElement("span");
-                chip.className = "chip";
-                chip.innerHTML = `
-      <span>${escapeHTML(ans)}</span>
-      <button class="remove" aria-label="Remove ${escapeHTML(ans)}" data-idx="${idx}">×</button>
-    `;
-                customList.appendChild(chip);
-            });
-        }
+    // Render custom chips
+    function renderCustomChips() {
+      customList.innerHTML = "";
+      customAnswers.forEach((ans, idx) => {
+        const chip = document.createElement("span");
+        chip.className = "chip";
+        chip.innerHTML = `
+          <span>${ans}</span>
+          <button class="remove" data-idx="${idx}">×</button>
+        `;
+        customList.appendChild(chip);
+      });
+    }
 
-        /* ===== Add custom answer ===== */
-        customForm.addEventListener("submit", (e) => {
-            e.preventDefault();
-            const raw = (customInput.value || "").trim();
-            if (!raw) return;
+    // Add custom
+    customForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const val = customInput.value.trim();
+      if (!val) return;
+      if (customAnswers.length >= 25) return alert("Max 25 custom answers");
+      if (customAnswers.some(a => a.toLowerCase() === val.toLowerCase())) return;
+      customAnswers.push(val);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnswers));
+      renderCustomChips();
+      customInput.value = "";
+    });
 
-            // Normalize: cap length, remove duplicates (case-insensitive)
-            const txt = raw.slice(0, 50);
-            const exists = customAnswers.some(a => a.toLowerCase() === txt.toLowerCase());
-            if (exists) {
-                customInput.value = "";
-                return;
-            }
+    // Remove chip
+    customList.addEventListener("click", (e) => {
+      if (!e.target.classList.contains("remove")) return;
+      const idx = +e.target.dataset.idx;
+      customAnswers.splice(idx, 1);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnswers));
+      renderCustomChips();
+    });
 
-            // Limit total custom answers if you like (e.g. 25)
-            if (customAnswers.length >= 25) {
-                alert("You've reached the max of 25 custom answers.");
-                return;
-            }
+    // Clear all
+    clearBtn.addEventListener("click", () => {
+      if (!confirm("Remove all your custom answers?")) return;
+      customAnswers = [];
+      localStorage.setItem(STORAGE_KEY, "[]");
+      renderCustomChips();
+    });
 
-            customAnswers.push(txt);
-            saveCustomAnswers();
-            renderCustomChips();
-            customInput.value = "";
-        });
+    renderCustomChips();
 
-        /* ===== Remove a custom answer (chip ×) ===== */
-        customList.addEventListener("click", (e) => {
-            const btn = e.target.closest(".remove");
-            if (!btn) return;
-            const idx = Number(btn.dataset.idx);
-            if (!Number.isInteger(idx)) return;
+    // Motion detection
+    let lastShakeTime = 0;
+    let motionEnabled = false;
 
-            customAnswers.splice(idx, 1);
-            saveCustomAnswers();
-            renderCustomChips();
-        });
+    function handleMotion(event) {
+      const a = event.acceleration || event.accelerationIncludingGravity;
+      if (!a) return;
+      const x = a.x || 0, y = a.y || 0, z = a.z || 0;
+      const magnitude = Math.sqrt(x * x + y * y + z * z);
+      const excess = Math.max(0, Math.abs(magnitude - 9.81));
+      const now = Date.now();
+      if (excess > 6 && now - lastShakeTime > 900) {
+        lastShakeTime = now;
+        shakeBall();
+      }
+    }
 
-        /* ===== Clear all custom answers ===== */
-        clearBtn.addEventListener("click", () => {
-            if (customAnswers.length === 0) return;
-            if (!confirm("Remove all your custom answers?")) return;
-            customAnswers = [];
-            saveCustomAnswers();
-            renderCustomChips();
-        });
+    function requestMotionPermission() {
+      if (motionEnabled) return;
+      if (typeof DeviceMotionEvent !== "undefined" &&
+          typeof DeviceMotionEvent.requestPermission === "function") {
+        DeviceMotionEvent.requestPermission().then(state => {
+          if (state === "granted") {
+            window.addEventListener("devicemotion", handleMotion, { passive: true });
+            motionEnabled = true;
+            document.getElementById("enableMotion").style.display = "none";
+          } else {
+            alert("Motion permission denied on iOS.");
+          }
+        }).catch(console.error);
+      } else {
+        window.addEventListener("devicemotion", handleMotion, { passive: true });
+        motionEnabled = true;
+        document.getElementById("enableMotion").style.display = "none";
+      }
+    }
 
-        /* ===== Helpers ===== */
-        function escapeHTML(s) {
-            return s.replace(/[&<>"']/g, c => ({
-                "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-            }[c]));
-        }
-
-        /* ===== Device motion (from earlier step) ===== */
-        let lastShakeTime = 0;
-
-        function handleMotion(event) {
-            const acc = event.accelerationIncludingGravity;
-            if (!acc) return;
-
-            const x = acc.x || 0;
-            const y = acc.y || 0;
-            const z = acc.z || 0;
-
-            const currentTime = Date.now();
-            const deltaTime = currentTime - lastShakeTime;
-
-            const shakeThreshold = 15; // tweak as needed
-            const totalForce = Math.sqrt(x * x + y * y + z * z);
-
-            if (totalForce > shakeThreshold && deltaTime > 1000) {
-                lastShakeTime = currentTime;
-                shakeBall();
-            }
-        }
-
-        function enableMotionDetection() {
-            if (typeof DeviceMotionEvent !== "undefined" &&
-                typeof DeviceMotionEvent.requestPermission === "function") {
-                DeviceMotionEvent.requestPermission()
-                    .then(res => {
-                        if (res === "granted") {
-                            window.addEventListener("devicemotion", handleMotion);
-                        } else {
-                            console.log("Motion permission denied.");
-                        }
-                    })
-                    .catch(console.error);
-            } else {
-                window.addEventListener("devicemotion", handleMotion);
-            }
-        }
-
-        window.addEventListener("load", () => {
-            enableMotionDetection();
-            renderCustomChips(); // draw persisted chips on load
-        });
-
-    </script>
+    document.getElementById("enableMotion").addEventListener("click", requestMotionPermission);
+    document.getElementById("shakeBtn").addEventListener("click", () => {
+      shakeBall();
+      if (!motionEnabled) requestMotionPermission();
+    });
+  </script>
 </body>
-
 </html>
