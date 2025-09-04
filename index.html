@@ -114,6 +114,14 @@
       box-shadow: 0 6px 12px rgba(0, 255, 255, 0.5);
     }
 
+    /* Disabled button look while shaking */
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
     /* Custom answers panel */
     .custom-form {
       display: flex;
@@ -227,10 +235,11 @@
       <button id="clearCustom" class="clear-btn" type="button">Clear custom answers</button>
     </div>
 
-    <p class="mobile-hint">On mobile? Shake your phone!</p>
+    <p class="mobile-hint">On mobile? Shake your phone! (iOS requires tapping “Enable phone shake” and HTTPS)</p>
   </div>
 
   <script>
+    /* ===== Built-in + custom answers ===== */
     const defaultAnswers = [
       "Yes", "No", "Maybe", "Ask again later",
       "Definitely", "Absolutely not", "It is certain",
@@ -243,25 +252,36 @@
 
     const answerText = document.getElementById("answerText");
     const ball = document.getElementById("magicBall");
+    const shakeBtn = document.getElementById("shakeBtn");
     const customForm = document.getElementById("customForm");
     const customInput = document.getElementById("customInput");
     const customList = document.getElementById("customAnswers");
     const clearBtn = document.getElementById("clearCustom");
 
+    /* ===== Shake flow with animationend + button lock ===== */
     function shakeBall() {
-      if (ball.classList.contains("shake")) return;
+      if (ball.classList.contains("shake")) return;   // ignore if already shaking
+      if (shakeBtn) shakeBtn.disabled = true;         // lock button during animation
+
       ball.classList.add("shake");
       answerText.style.opacity = 0;
-      setTimeout(() => {
+
+      const onEnd = () => {
+        // pick answer when animation completes
         const pool = [...defaultAnswers, ...customAnswers];
         const randomAnswer = pool[Math.floor(Math.random() * pool.length)] || "ASK AGAIN LATER";
         answerText.textContent = randomAnswer.toUpperCase();
         answerText.style.opacity = 1;
+
         ball.classList.remove("shake");
-      }, 600);
+        if (shakeBtn) shakeBtn.disabled = false;      // unlock button
+        ball.removeEventListener("animationend", onEnd);
+      };
+
+      ball.addEventListener("animationend", onEnd);
     }
 
-    // Render custom chips
+    /* ===== Custom answers UI ===== */
     function renderCustomChips() {
       customList.innerHTML = "";
       customAnswers.forEach((ans, idx) => {
@@ -275,7 +295,6 @@
       });
     }
 
-    // Add custom
     customForm.addEventListener("submit", (e) => {
       e.preventDefault();
       const val = customInput.value.trim();
@@ -288,7 +307,6 @@
       customInput.value = "";
     });
 
-    // Remove chip
     customList.addEventListener("click", (e) => {
       if (!e.target.classList.contains("remove")) return;
       const idx = +e.target.dataset.idx;
@@ -297,7 +315,6 @@
       renderCustomChips();
     });
 
-    // Clear all
     clearBtn.addEventListener("click", () => {
       if (!confirm("Remove all your custom answers?")) return;
       customAnswers = [];
@@ -307,19 +324,39 @@
 
     renderCustomChips();
 
-    // Motion detection
-    let lastShakeTime = 0;
+    /* ===== Device motion with hysteresis (prevents endless re-triggers) ===== */
     let motionEnabled = false;
+    let motionArmed = true;        // only fire when armed
+    let calmStart = 0;             // timestamp when calm began
+    const TRIGGER = 8;             // shake trigger (excess m/s²)
+    const CALM = 1.5;              // consider it calm below this
+    const CALM_HOLD_MS = 700;      // must stay calm for this to re-arm
 
     function handleMotion(event) {
       const a = event.acceleration || event.accelerationIncludingGravity;
       if (!a) return;
+
       const x = a.x || 0, y = a.y || 0, z = a.z || 0;
-      const magnitude = Math.sqrt(x * x + y * y + z * z);
-      const excess = Math.max(0, Math.abs(magnitude - 9.81));
+      const magnitude = Math.sqrt(x*x + y*y + z*z);
+      const excess = Math.max(0, Math.abs(magnitude - 9.81)); // remove gravity baseline
       const now = Date.now();
-      if (excess > 6 && now - lastShakeTime > 900) {
-        lastShakeTime = now;
+
+      if (!motionArmed) {
+        // wait until calm for CALM_HOLD_MS before re-arming
+        if (excess < CALM) {
+          if (!calmStart) calmStart = now;
+          if (now - calmStart >= CALM_HOLD_MS) {
+            motionArmed = true;
+            calmStart = 0;
+          }
+        } else {
+          calmStart = 0; // movement again: reset calm timer
+        }
+        return;
+      }
+
+      if (excess > TRIGGER) {
+        motionArmed = false;  // disarm immediately
         shakeBall();
       }
     }
@@ -328,26 +365,40 @@
       if (motionEnabled) return;
       if (typeof DeviceMotionEvent !== "undefined" &&
           typeof DeviceMotionEvent.requestPermission === "function") {
+        // iOS requires a user gesture
         DeviceMotionEvent.requestPermission().then(state => {
           if (state === "granted") {
             window.addEventListener("devicemotion", handleMotion, { passive: true });
             motionEnabled = true;
-            document.getElementById("enableMotion").style.display = "none";
+            document.getElementById("enableMotion")?.style && (document.getElementById("enableMotion").style.display = "none");
           } else {
             alert("Motion permission denied on iOS.");
           }
         }).catch(console.error);
       } else {
+        // Android/others
         window.addEventListener("devicemotion", handleMotion, { passive: true });
         motionEnabled = true;
-        document.getElementById("enableMotion").style.display = "none";
+        document.getElementById("enableMotion")?.style && (document.getElementById("enableMotion").style.display = "none");
       }
     }
 
     document.getElementById("enableMotion").addEventListener("click", requestMotionPermission);
     document.getElementById("shakeBtn").addEventListener("click", () => {
+      // clicking always shakes once
       shakeBall();
+      // first click also attempts to enable motion (satisfies iOS gesture requirement)
       if (!motionEnabled) requestMotionPermission();
+    });
+
+    // Optional: pause/resume motion listener when tab visibility changes
+    document.addEventListener("visibilitychange", () => {
+      if (!motionEnabled) return;
+      if (document.hidden) {
+        window.removeEventListener("devicemotion", handleMotion);
+      } else {
+        window.addEventListener("devicemotion", handleMotion, { passive: true });
+      }
     });
   </script>
 </body>
