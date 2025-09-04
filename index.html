@@ -3,21 +3,27 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
   <title>Magic 8 Ball</title>
   <style>
+    /* Mobile-safe layout: dynamic viewport + safe-area padding */
     body {
       background: #5d228a;
       color: white;
       font-family: 'Segoe UI', sans-serif;
       text-align: center;
-      padding-top: 40px;
       margin: 0;
-      height: 100vh;
-      overflow: hidden;
+      padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0;
+      min-height: 100dvh;   /* dynamic vh for mobile address bar changes */
+      box-sizing: border-box;
+      overflow-x: hidden;
     }
 
     h1 {
+      margin-top: 20px;   /* breathing room under notches/status bar */
       padding-bottom: 20px;
       text-align: center;
     }
@@ -203,14 +209,16 @@
 
     .mobile-hint {
       font-size: 14px;
-      color: #aaa;
+      color: #ddd;
       margin-top: 10px;
+      padding: 0 env(safe-area-inset-left) 0 env(safe-area-inset-right);
     }
   </style>
 </head>
 
 <body>
   <div class="container">
+    <h1>🎱 Magic 8 Ball 🎱</h1>
     <div class="magic-8-ball" id="magicBall">
       <div class="answer">
         <div class="triangle"></div>
@@ -234,7 +242,7 @@
       <button id="clearCustom" class="clear-btn" type="button">Clear custom answers</button>
     </div>
 
-    <p class="mobile-hint">On mobile? Shake your phone! (iOS requires tapping “Enable phone shake” and HTTPS)</p>
+    <p class="mobile-hint">On mobile? Shake your phone! (iOS: tap “Enable phone shake” & use HTTPS)</p>
   </div>
 
   <script>
@@ -243,7 +251,7 @@
       "Yes", "No", "Maybe", "Ask again later",
       "Definitely", "Absolutely not", "It is certain",
       "I doubt it", "Most likely", "Cannot predict now",
-      "You may rely on it", "Outlook good", "My sources say no"
+      "You may rely on it", "Outlook good", "My sources say no", "Girl, no", "You'd like that", "IDK", "You don't wanna know"
     ];
 
     const STORAGE_KEY = "magic8_custom_answers";
@@ -266,7 +274,6 @@
       answerText.style.opacity = 0;
 
       const onEnd = () => {
-        // pick answer when animation completes
         const pool = [...defaultAnswers, ...customAnswers];
         const randomAnswer = pool[Math.floor(Math.random() * pool.length)] || "ASK AGAIN LATER";
         answerText.textContent = randomAnswer.toUpperCase();
@@ -323,7 +330,7 @@
 
     renderCustomChips();
 
-    /* ===== Device motion with hysteresis (prevents endless re-triggers) ===== */
+    /* ===== Device motion with hysteresis ===== */
     let motionEnabled = false;
     let motionArmed = true;        // only fire when armed
     let calmStart = 0;             // timestamp when calm began
